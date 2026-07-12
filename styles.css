@@ -124,3 +124,23 @@ html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); }
   70%  { opacity:1; }
   100% { opacity:0; transform:scale(1); }
 }
+
+/* ---- Mobile: info panel becomes a scrollable bottom sheet ---- */
+@media (max-width: 640px) {
+  #panel {
+    top:auto; left:0; right:0; bottom:0;
+    width:100%; max-width:100%;
+    max-height:60vh;
+    border-radius:18px 18px 0 0;
+    padding:6px 16px 20px;
+    box-shadow:0 -6px 24px rgba(20,40,30,0.20);
+    -webkit-overflow-scrolling:touch;
+  }
+  /* grab handle */
+  #panel::before {
+    content:""; display:block; width:40px; height:4px; margin:6px auto 12px;
+    border-radius:99px; background:var(--line);
+  }
+  #panel-close { top:10px; right:14px; }
+  .bag-toast span { font-size:44px; padding:14px 34px; }
+}

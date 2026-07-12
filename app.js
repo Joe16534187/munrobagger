@@ -172,9 +172,13 @@ function selectMunro(id, keepRouteId = null) {
     if (rt) map.getSource('route').setData({ type: 'Feature', geometry: rt.geometry, properties: {} });
   } else {
     clearRoute();
-    map.flyTo({ center: munroById[id].geometry.coordinates, zoom: Math.max(map.getZoom(), 10), speed: 0.8, padding: { right: 380 } });
+    const pad = isMobile() ? { bottom: Math.round(window.innerHeight * 0.6) } : { right: 380 };
+    map.flyTo({ center: munroById[id].geometry.coordinates, zoom: Math.max(map.getZoom(), 10), speed: 0.8, padding: pad });
   }
 }
+
+// Below this width the info panel is a bottom sheet, so the map should leave room below (not to the right).
+function isMobile() { return window.innerWidth <= 640; }
 
 function renderTick(id, done) {
   const today = todayStr();
@@ -261,7 +265,10 @@ function showRoute(rt) {
   map.setPaintProperty('route-line', 'line-dasharray', approx ? [2, 1.4] : [1]);
   const coords = rt.geometry.coordinates;
   const b = coords.reduce((bb, c) => bb.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-  map.fitBounds(b, { padding: { top: 80, bottom: 80, left: 80, right: 400 }, maxZoom: 14 });
+  const pad = isMobile()
+    ? { top: 40, bottom: Math.round(window.innerHeight * 0.6) + 20, left: 24, right: 24 }
+    : { top: 80, bottom: 80, left: 80, right: 400 };
+  map.fitBounds(b, { padding: pad, maxZoom: 14 });
 }
 function clearRoute() { if (map.getSource('route')) map.getSource('route').setData({ type: 'FeatureCollection', features: [] }); }
 
