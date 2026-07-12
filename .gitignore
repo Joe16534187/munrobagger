@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+# Large raw source (regenerate munros.geojson from the DoBIH download)
+munro-app/data/munrotab_v8.0.1.csv
