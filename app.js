@@ -230,7 +230,7 @@ function wirePanel(id) {
     const d = body.querySelector('#tick-date').value || todayStr();
     bagged[id] = d; saveBagged();
     map.setFeatureState({ source: 'munros', id }, { bagged: true });
-    updateCounter(); reapplyFilter(); selectMunro(id, activeRouteId);
+    updateCounter(); reapplyFilter(); showBaggedToast(); selectMunro(id, activeRouteId);
   };
   const untick = body.querySelector('[data-untick]');
   if (untick) untick.onclick = () => {
@@ -269,6 +269,15 @@ function closePanel() {
   document.getElementById('panel').hidden = true;
   document.getElementById('hint').style.display = '';
   selectedId = null; clearRoute();
+}
+
+// Big centred "Bagged!" confirmation that fades out after 2s
+function showBaggedToast() {
+  const t = document.createElement('div');
+  t.className = 'bag-toast';
+  t.innerHTML = '<span>Bagged!</span>';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
 }
 
 /* ---------- counter & filter helpers ---------- */
