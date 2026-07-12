@@ -124,6 +124,8 @@ function wireInteractions() {
   exportMenu.querySelectorAll('button').forEach(b => {
     b.onclick = () => { doExport(b.dataset.export); exportMenu.hidden = true; };
   });
+
+  window.addEventListener('resize', () => { if (!document.getElementById('panel').hidden) layoutPanel(); });
 }
 
 function applyFilter(kind) {
@@ -165,6 +167,7 @@ function selectMunro(id, keepRouteId = null) {
 
   panel.hidden = false;
   wirePanel(id);
+  layoutPanel();
 
   if (activeRouteId) {
     // re-render kept a route selected (e.g. after ticking) — redraw its line, don't move the map
@@ -180,17 +183,39 @@ function selectMunro(id, keepRouteId = null) {
 // Below this width the info panel is a bottom sheet, so the map should leave room below (not to the right).
 function isMobile() { return window.innerWidth <= 640; }
 
+// Size/position the panel. Desktop: gap below the top bar equals the 12px edge gaps.
+// Mobile: cap the bottom sheet so "Routes up" starts just below the fold (scroll to reveal).
+function layoutPanel() {
+  const panel = document.getElementById('panel');
+  if (isMobile()) {
+    panel.style.top = '';                 // let the bottom-sheet CSS take over
+    const rh = panel.querySelector('.routes-head');
+    if (rh && !panel.hidden) {
+      const off = rh.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
+      panel.style.maxHeight = Math.round(Math.max(160, Math.min(window.innerHeight * 0.72, off))) + 'px';
+    } else {
+      panel.style.maxHeight = '';
+    }
+  } else {
+    panel.style.maxHeight = '';
+    const tb = document.getElementById('topbar').getBoundingClientRect();
+    panel.style.top = (tb.bottom + 12) + 'px';   // 12px matches the edge gaps
+  }
+}
+
 function renderTick(id, done) {
   const today = todayStr();
+  // Both states share the same structure (one-line label + one control row) so the
+  // box is exactly the same height before and after bagging — content below never shifts.
   if (done) {
     return `<div class="tick-box done">
-      <div class="done-note">
-        <div><span class="chk">✓ Bagged</span> <span style="color:var(--ink-soft)">on ${fmtDate(done)}</span></div>
-        <button class="btn btn-ghost" data-untick>Remove</button>
+      <label><span class="chk">✓ Bagged</span> on ${fmtDate(done)}</label>
+      <div class="field">
+        <button class="btn btn-ghost btn-wide" data-untick>Remove</button>
       </div></div>`;
   }
   return `<div class="tick-box">
-    <label>Bag this Munro — pick the date you climbed it</label>
+    <label>Pick the date you climbed it</label>
     <div class="field">
       <input type="date" id="tick-date" value="${today}" max="${today}"
              onclick="this.showPicker && this.showPicker()" onfocus="this.showPicker && this.showPicker()">

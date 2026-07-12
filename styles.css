@@ -71,14 +71,16 @@ html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); }
 
 .tick-box { margin:14px 0 6px; padding:14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); }
 .tick-box.done { border-color:var(--accent); background:var(--accent-soft); }
-.tick-box label { font-size:13px; color:var(--ink-soft); display:block; margin-bottom:8px; }
-.tick-box .field { display:flex; gap:8px; }
+.tick-box label { font-size:13px; color:var(--ink-soft); display:block; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tick-box .field { display:flex; gap:8px; min-height:38px; align-items:center; }
+.btn-wide { flex:1; }
 .tick-box input[type=date] { flex:1; padding:8px 10px; border:1px solid var(--line); border-radius:9px; background:var(--panel); color:var(--ink); font-size:14px; }
 .btn { border:0; border-radius:9px; padding:9px 14px; font-size:14px; font-weight:600; cursor:pointer; }
 .btn-primary { background:var(--accent); color:#fff; }
 .btn-ghost { background:transparent; color:var(--ink-soft); border:1px solid var(--line); }
 .done-note { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .done-note .chk { color:var(--accent); font-weight:700; }
+.chk { color:var(--accent); font-weight:700; }
 
 .routes-head { display:flex; align-items:baseline; justify-content:space-between; margin:20px 0 8px; }
 .routes-head h3 { font-size:14px; margin:0; }
