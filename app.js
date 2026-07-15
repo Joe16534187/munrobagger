@@ -49,6 +49,8 @@ map.on('load', async () => {
 
   munros.features.forEach(f => { munroById[f.properties.id] = f; });
   routeData.routes.forEach(rt => {
+    // geometry may arrive as an encoded polyline (compact) or a plain GeoJSON line
+    if (rt.poly && !rt.geometry) rt.geometry = { type: 'LineString', coordinates: decodePolyline(atob(rt.poly)) };
     rt.munro_ids.forEach(id => {
       (routesByMunro[id] ||= []).push(rt);
       routeIds.add(id);
@@ -225,8 +227,9 @@ function renderTick(id, done) {
 
 function renderRoute(rt) {
   const gs = rt.geometry_status;
-  const dot = gs === 'derived' ? 'ok' : gs === 'derived-approx' ? 'approx' : 'none';
-  const dotTitle = gs === 'derived' ? 'Derived from mapped paths'
+  const dot = (gs === 'verified' || gs === 'derived') ? 'ok' : gs === 'derived-approx' ? 'approx' : 'none';
+  const dotTitle = gs === 'verified' ? 'Verified route'
+    : gs === 'derived' ? 'Derived from mapped paths'
     : gs === 'derived-approx' ? 'Derived; approach approximate' : 'No mapped path';
   const dist = rt.distance_km != null ? `<span><b>${rt.distance_km}</b> km</span>` : `<span class="muted">dist n/a</span>`;
   const time = rt.time_h != null ? `<span>~<b>${rt.time_h}</b> h</span>` : '';
@@ -241,7 +244,7 @@ function renderRoute(rt) {
       ${time}
       <span>${rt.type}</span>
     </div>
-    <div class="grade-note"><em>${rt.grade}</em></div>
+    ${rt.grade ? `<div class="grade-note"><em>${rt.grade}</em></div>` : ''}
   </div>`;
 }
 
@@ -296,6 +299,21 @@ function showRoute(rt) {
   map.fitBounds(b, { padding: pad, maxZoom: 14 });
 }
 function clearRoute() { if (map.getSource('route')) map.getSource('route').setData({ type: 'FeatureCollection', features: [] }); }
+
+// Decode a Google-style encoded polyline (precision 1e5) to [[lon,lat],...]
+function decodePolyline(str) {
+  let index = 0, lat = 0, lng = 0; const coords = [];
+  while (index < str.length) {
+    let b, shift = 0, result = 0;
+    do { b = str.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+    shift = 0; result = 0;
+    do { b = str.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+    coords.push([lng / 1e5, lat / 1e5]);
+  }
+  return coords;
+}
 
 function closePanel() {
   document.getElementById('panel').hidden = true;
